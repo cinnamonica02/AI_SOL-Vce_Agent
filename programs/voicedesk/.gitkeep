@@ -1,0 +1,12 @@
+# This directory will be populated by `anchor init voicedesk` (run from the repo root).
+# After init, the structure becomes:
+#
+#   programs/voicedesk/
+#   ├── Cargo.toml
+#   ├── Xargo.toml
+#   └── src/
+#       ├── lib.rs
+#       ├── state/          (we add this manually)
+#       └── instructions/   (we add this manually)
+#
+# Don't delete this file until anchor init has run.

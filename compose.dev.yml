@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────────────────────────
+#  VoiceDesk — Development Compose
+#
+#  Runs the AI engine (FastAPI bridge) with hot-reload.
+#  Frontend (Next.js) and Anchor program run outside Docker for
+#  faster iteration and easier debugger attach.
+#
+#  Usage:
+#    docker compose -f compose.dev.yml up         # starts AI engine
+#    docker compose -f compose.dev.yml down       # stops everything
+#    docker compose -f compose.dev.yml logs -f    # tails logs
+# ─────────────────────────────────────────────────────────────────
+
+services:
+
+  ai_engine:
+    container_name: voicedesk_ai_engine
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: voicedesk/ai_engine:dev
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      # Hot-reload: mount source over the image's /app
+      - ./ai_engine:/app
+      # Optional: persist Poetry cache to speed up rebuilds
+      - poetry_cache:/root/.cache/pypoetry
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  poetry_cache:
+
+# ─────────────────────────────────────────────────────────────────
+#  Notes for future expansion (Phase 2+):
+#   - Add `frontend` service if we want containerized Next.js dev
+#   - Add `solana-validator` service for fully isolated local testing
+#   - Add `ngrok` service for automatic webhook tunneling
+# ─────────────────────────────────────────────────────────────────

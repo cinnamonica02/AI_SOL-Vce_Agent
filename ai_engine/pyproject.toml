@@ -1,0 +1,50 @@
+[tool.poetry]
+name = "voicedesk-ai-engine"
+version = "0.1.0"
+description = "VoiceDesk AI engine — thin FastAPI bridge between ElevenLabs Conversational AI and the Solana Anchor program"
+authors = ["VoiceDesk Team"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.110.0"
+uvicorn = {extras = ["standard"], version = "^0.27.0"}
+pydantic = "^2.6.0"
+pydantic-settings = "^2.2.0"
+httpx = "^0.27.0"
+python-dotenv = "^1.0.0"
+# Solana / Anchor
+solana = "^0.34.0"
+anchorpy = "^0.20.0"
+solders = "^0.21.0"
+# LLM clients (used directly only if we bypass ElevenLabs LLM integration)
+anthropic = "^0.25.0"
+openai = "^1.20.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+pytest-cov = "^4.1.0"
+mypy = "^1.9.0"
+ruff = "^0.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

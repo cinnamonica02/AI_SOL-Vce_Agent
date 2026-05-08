@@ -1,0 +1,5 @@
+# Next.js 14 frontend will be initialized here:
+#
+#   pnpm create next-app@latest . --typescript --tailwind --app --no-src-dir
+#
+# After init, route groups (public)/(writer)/(admin) get added under app/.
