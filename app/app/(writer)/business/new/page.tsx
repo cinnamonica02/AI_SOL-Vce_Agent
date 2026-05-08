@@ -1,20 +1,41 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { SystemProgram } from "@solana/web3.js";
+import {
+  BN,
+  deriveBusinessPda,
+  useVoiceDeskProgram,
+  verticalEnum,
+} from "@/lib/anchor-client";
 
-/**
- * SMB onboarding — calls `create_business` instruction.
- *
- * MVP UI: minimal form. Day 3: hook up real Anchor client and submit tx.
- */
+const VERTICALS = [
+  "Hotel",
+  "CarRental",
+  "SkiRental",
+  "EquipmentRental",
+  "Restaurant",
+  "Dental",
+  "Salon",
+  "Coworking",
+  "Other",
+];
+
 export default function NewBusinessPage() {
-  const { connected } = useWallet();
+  const router = useRouter();
+  const { connected, publicKey } = useWallet();
+  const program = useVoiceDeskProgram();
+
   const [vertical, setVertical] = useState("Hotel");
   const [name, setName] = useState("");
-  const [depositPln, setDepositPln] = useState("50");
+  const [depositUsdc, setDepositUsdc] = useState("50");
   const [cancellationHours, setCancellationHours] = useState("24");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [txSig, setTxSig] = useState<string | null>(null);
 
   if (!connected) {
     return (
@@ -30,10 +51,41 @@ export default function NewBusinessPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO Day 3: call program.methods.createBusiness(...)
-    alert(
-      `TODO: submit create_business tx\nvertical=${vertical}, name=${name}, deposit=${depositPln} PLN, cancellation=${cancellationHours}h`
-    );
+    if (!program || !publicKey) {
+      setError("Program not ready — check IDL is synced");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    setTxSig(null);
+
+    try {
+      const [businessPda] = deriveBusinessPda(publicKey);
+      const depositBaseUnits = new BN(Math.floor(parseFloat(depositUsdc) * 1_000_000));
+
+      const sig = await program.methods
+        .createBusiness(
+          verticalEnum(vertical),
+          name,
+          depositBaseUnits,
+          parseInt(cancellationHours, 10)
+        )
+        .accounts({
+          business: businessPda,
+          owner: publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+
+      setTxSig(sig);
+      setTimeout(() => router.push("/dashboard"), 2000);
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.message ?? String(err));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -54,15 +106,9 @@ export default function NewBusinessPage() {
               onChange={(e) => setVertical(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background"
             >
-              <option>Hotel</option>
-              <option>CarRental</option>
-              <option>SkiRental</option>
-              <option>EquipmentRental</option>
-              <option>Restaurant</option>
-              <option>Dental</option>
-              <option>Salon</option>
-              <option>Coworking</option>
-              <option>Other</option>
+              {VERTICALS.map((v) => (
+                <option key={v}>{v}</option>
+              ))}
             </select>
           </div>
 
@@ -85,9 +131,10 @@ export default function NewBusinessPage() {
             </label>
             <input
               type="number"
-              value={depositPln}
-              onChange={(e) => setDepositPln(e.target.value)}
-              min={1}
+              step="0.01"
+              min="0.01"
+              value={depositUsdc}
+              onChange={(e) => setDepositUsdc(e.target.value)}
               required
               className="w-full px-3 py-2 rounded-lg border border-border bg-background"
             />
@@ -110,10 +157,36 @@ export default function NewBusinessPage() {
 
           <button
             type="submit"
-            className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-medium"
+            disabled={submitting || !program}
+            className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-medium disabled:opacity-50"
           >
-            Create business on-chain
+            {submitting ? "Submitting tx…" : "Create business on-chain"}
           </button>
+
+          {error && (
+            <div className="rounded-lg border border-red-500/30 bg-red-50 dark:bg-red-950/20 p-3 text-sm text-red-700 dark:text-red-300">
+              {error}
+            </div>
+          )}
+
+          {txSig && (
+            <div className="rounded-lg border border-green-500/30 bg-green-50 dark:bg-green-950/20 p-3 text-sm space-y-1">
+              <div className="text-green-700 dark:text-green-300 font-medium">
+                ✓ Business created
+              </div>
+              <a
+                href={`https://explorer.solana.com/tx/${txSig}?cluster=devnet`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs underline break-all block"
+              >
+                {txSig}
+              </a>
+              <div className="text-xs text-muted-foreground">
+                Redirecting to dashboard…
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </main>

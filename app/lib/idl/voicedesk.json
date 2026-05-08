@@ -1,0 +1,14 @@
+{
+  "_comment": "STUB. Replace with the real IDL after anchor build:",
+  "_command": "cp target/idl/voicedesk.json app/lib/idl/voicedesk.json",
+  "address": "41HHr5soWR3ScMDKZWPDiaN63KXaqkiAaauzE9MjUtWT",
+  "metadata": {
+    "name": "voicedesk",
+    "version": "0.1.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [],
+  "accounts": [],
+  "errors": [],
+  "types": []
+}

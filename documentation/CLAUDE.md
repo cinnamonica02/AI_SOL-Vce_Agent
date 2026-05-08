@@ -178,7 +178,8 @@ ngrok http 8000                                         # expose bridge to Eleve
 
 | Task | Steps |
 |---|---|
-| Add a new Anchor instruction | (1) Create file in `programs/voicedesk/src/instructions/` (2) Re-export in `lib.rs` (3) Add TS test in `/tests/` (4) Update `documentation/ARCHITECTURE.md` instruction table |
+| Add a new Anchor instruction | (1) Create file in `programs/voicedesk/src/instructions/` (2) Re-export in `lib.rs` (3) Add TS test in `/tests/` (4) Update `documentation/ARCHITECTURE.md` instruction table (5) `anchor build && cp target/idl/voicedesk.json app/lib/idl/voicedesk.json && git add -A && git commit -m "chore: sync IDL"` |
+| Sync IDL after `anchor build` | `cp target/idl/voicedesk.json app/lib/idl/voicedesk.json` — frontend imports the JSON directly, so this needs to be committed every time the program ABI changes |
 | Add a new vertical | (1) Add enum variant in `state/business.rs` `Vertical` (2) Create `ai_engine/voice_agent/personas/{vertical}_pl.md` (3) Add row to vertical table in `documentation/ARCHITECTURE.md` |
 | Add a new agent persona language | (1) Create `ai_engine/voice_agent/personas/{vertical}_{lang}.md` (2) Wire in voice agent config |
 | Add a new dashboard view | (1) Create `app/(writer)/{view-name}/page.tsx` (2) Add wallet check (3) Use generated Anchor client |

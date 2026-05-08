@@ -43,8 +43,12 @@ keys/
 *.json
 !Anchor.toml.example
 !package.json
+!package-lock.json
 !tsconfig.json
 !pyproject.toml
+!components.json
+# IDL files — committed so frontend builds without anchor toolchain
+!app/lib/idl/*.json
 
 # IDE
 .vscode/
