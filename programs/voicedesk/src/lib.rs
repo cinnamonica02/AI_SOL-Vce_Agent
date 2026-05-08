@@ -26,7 +26,7 @@ use state::Vertical;
 
 // Replace this placeholder after first `anchor build` with the value of
 // `solana address -k target/deploy/voicedesk-keypair.json`.
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("41HHr5soWR3ScMDKZWPDiaN63KXaqkiAaauzE9MjUtWT");
 
 #[program]
 pub mod voicedesk {
