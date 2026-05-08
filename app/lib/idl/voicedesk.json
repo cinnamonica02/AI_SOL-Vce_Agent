@@ -1,14 +1,1148 @@
 {
-  "_comment": "STUB. Replace with the real IDL after anchor build:",
-  "_command": "cp target/idl/voicedesk.json app/lib/idl/voicedesk.json",
   "address": "41HHr5soWR3ScMDKZWPDiaN63KXaqkiAaauzE9MjUtWT",
   "metadata": {
     "name": "voicedesk",
     "version": "0.1.0",
-    "spec": "0.1.0"
+    "spec": "0.1.0",
+    "description": "VoiceDesk — voice-initiated deposit escrow primitive"
   },
-  "instructions": [],
-  "accounts": [],
-  "errors": [],
-  "types": []
+  "instructions": [
+    {
+      "name": "claim_full",
+      "docs": [
+        "SMB claims a no-show after the grace period.",
+        "95% to business, 5% to protocol treasury."
+      ],
+      "discriminator": [
+        39,
+        211,
+        194,
+        199,
+        3,
+        128,
+        115,
+        222
+      ],
+      "accounts": [
+        {
+          "name": "booking",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  111,
+                  107,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "business",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  115,
+                  105,
+                  110,
+                  101,
+                  115,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "business.owner",
+                "account": "Business"
+              }
+            ]
+          }
+        },
+        {
+          "name": "business_owner",
+          "signer": true
+        },
+        {
+          "name": "business_token_account",
+          "docs": [
+            "Business token account — receives 95% of the deposit."
+          ],
+          "writable": true
+        },
+        {
+          "name": "treasury_token_account",
+          "docs": [
+            "Protocol treasury token account — receives 5% protocol fee.",
+            "(For MVP this is a fixed wallet's USDC ATA, passed by the client.)"
+          ],
+          "writable": true
+        },
+        {
+          "name": "escrow_token_account",
+          "writable": true
+        },
+        {
+          "name": "escrow_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "confirm_attendance",
+      "docs": [
+        "SMB confirms the customer attended → 100% refund."
+      ],
+      "discriminator": [
+        208,
+        43,
+        38,
+        19,
+        111,
+        19,
+        108,
+        50
+      ],
+      "accounts": [
+        {
+          "name": "booking",
+          "docs": [
+            "The Booking — must currently be Confirmed."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  111,
+                  107,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "business",
+          "docs": [
+            "The Business owning this booking."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  115,
+                  105,
+                  110,
+                  101,
+                  115,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "business.owner",
+                "account": "Business"
+              }
+            ]
+          }
+        },
+        {
+          "name": "business_owner",
+          "docs": [
+            "Business owner — must match `business.owner`."
+          ],
+          "signer": true
+        },
+        {
+          "name": "customer_token_account",
+          "docs": [
+            "Customer's USDC token account (refund destination)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "escrow_token_account",
+          "docs": [
+            "Per-booking escrow token account."
+          ],
+          "writable": true
+        },
+        {
+          "name": "escrow_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_booking_intent",
+      "docs": [
+        "Reserve a booking_id and create the Booking PDA in Pending state.",
+        "Called by the bridge after the voice agent confirms an intent."
+      ],
+      "discriminator": [
+        107,
+        89,
+        125,
+        250,
+        85,
+        142,
+        240,
+        200
+      ],
+      "accounts": [
+        {
+          "name": "booking",
+          "docs": [
+            "The Booking PDA being created.",
+            "Seeds: [\"booking\", booking_id]"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  111,
+                  107,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "booking_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "business",
+          "docs": [
+            "The Business this booking belongs to."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  115,
+                  105,
+                  110,
+                  101,
+                  115,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "business.owner",
+                "account": "Business"
+              }
+            ]
+          }
+        },
+        {
+          "name": "customer",
+          "docs": [
+            "later via `lock_deposit`. This lets the bridge create intents without",
+            "requiring the customer's signature upfront."
+          ]
+        },
+        {
+          "name": "payer",
+          "docs": [
+            "The wallet paying for account creation. Usually the bridge's wallet",
+            "or the SMB owner."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "booking_id",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "deposit_amount",
+          "type": "u64"
+        },
+        {
+          "name": "service_start",
+          "type": "i64"
+        },
+        {
+          "name": "service_end",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "create_business",
+      "docs": [
+        "Onboard a new SMB."
+      ],
+      "discriminator": [
+        151,
+        158,
+        148,
+        231,
+        53,
+        237,
+        97,
+        61
+      ],
+      "accounts": [
+        {
+          "name": "business",
+          "docs": [
+            "The Business PDA being created.",
+            "Seeds: [\"business\", owner.key()]"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  115,
+                  105,
+                  110,
+                  101,
+                  115,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "docs": [
+            "SMB owner — pays for account creation and becomes the authoritative signer."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vertical",
+          "type": {
+            "defined": {
+              "name": "Vertical"
+            }
+          }
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "default_deposit_amount",
+          "type": "u64"
+        },
+        {
+          "name": "cancellation_hours",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "customer_cancel",
+      "docs": [
+        "Customer cancels — full refund if cancellation policy is met,",
+        "50% refund otherwise. Reverts after service has started."
+      ],
+      "discriminator": [
+        94,
+        72,
+        188,
+        10,
+        41,
+        162,
+        223,
+        50
+      ],
+      "accounts": [
+        {
+          "name": "booking",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  111,
+                  107,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "business",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  115,
+                  105,
+                  110,
+                  101,
+                  115,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "business.owner",
+                "account": "Business"
+              }
+            ]
+          }
+        },
+        {
+          "name": "customer",
+          "docs": [
+            "Customer cancelling — must match booking.customer."
+          ],
+          "signer": true
+        },
+        {
+          "name": "customer_token_account",
+          "writable": true
+        },
+        {
+          "name": "business_token_account",
+          "writable": true
+        },
+        {
+          "name": "escrow_token_account",
+          "writable": true
+        },
+        {
+          "name": "escrow_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "lock_deposit",
+      "docs": [
+        "Customer signs to fund the per-booking escrow with USDC."
+      ],
+      "discriminator": [
+        188,
+        133,
+        191,
+        52,
+        92,
+        123,
+        37,
+        56
+      ],
+      "accounts": [
+        {
+          "name": "booking",
+          "docs": [
+            "The Booking being funded. Must currently be in Pending status."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  111,
+                  107,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "customer",
+          "docs": [
+            "Customer signing and paying the deposit. Must match `booking.customer`."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "customer_token_account",
+          "docs": [
+            "Customer's USDC token account (source)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "escrow_token_account",
+          "docs": [
+            "Per-booking escrow token account, created by the client (associated token",
+            "account of the escrow PDA authority). Holds the locked USDC."
+          ],
+          "writable": true
+        },
+        {
+          "name": "escrow_authority",
+          "docs": [
+            "Seeds: [\"escrow\", booking_id]"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "release_partial",
+      "docs": [
+        "SMB claims partial damages — split escrow by basis points.",
+        "`customer_share_bps` 0..=10000 (where 10000 = 100% to customer)."
+      ],
+      "discriminator": [
+        86,
+        57,
+        247,
+        124,
+        243,
+        51,
+        221,
+        170
+      ],
+      "accounts": [
+        {
+          "name": "booking",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  111,
+                  107,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "business",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  115,
+                  105,
+                  110,
+                  101,
+                  115,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "business.owner",
+                "account": "Business"
+              }
+            ]
+          }
+        },
+        {
+          "name": "business_owner",
+          "signer": true
+        },
+        {
+          "name": "customer_token_account",
+          "docs": [
+            "Customer's token account (gets the customer's share back)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "business_token_account",
+          "docs": [
+            "Business's token account (gets the damages share)."
+          ],
+          "writable": true
+        },
+        {
+          "name": "escrow_token_account",
+          "writable": true
+        },
+        {
+          "name": "escrow_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "booking.booking_id",
+                "account": "Booking"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "customer_share_bps",
+          "type": "u16"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Booking",
+      "discriminator": [
+        147,
+        50,
+        61,
+        138,
+        208,
+        21,
+        254,
+        156
+      ]
+    },
+    {
+      "name": "Business",
+      "discriminator": [
+        60,
+        203,
+        129,
+        133,
+        68,
+        183,
+        210,
+        177
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidBusinessName",
+      "msg": "Business name must be between 1 and 64 characters"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidCancellationPolicy",
+      "msg": "Cancellation policy must be between 1 and 720 hours"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidDepositAmount",
+      "msg": "Deposit amount must be greater than zero"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidServiceStart",
+      "msg": "Service start must be in the future"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidServiceWindow",
+      "msg": "Service end must be after service start"
+    },
+    {
+      "code": 6005,
+      "name": "BookingNotPending",
+      "msg": "Booking is not in Pending status"
+    },
+    {
+      "code": 6006,
+      "name": "BookingNotConfirmed",
+      "msg": "Booking is not in Confirmed status"
+    },
+    {
+      "code": 6007,
+      "name": "BookingAlreadyFinalized",
+      "msg": "Booking has already been finalized"
+    },
+    {
+      "code": 6008,
+      "name": "UnauthorizedBusinessOwner",
+      "msg": "Only the business owner can perform this action"
+    },
+    {
+      "code": 6009,
+      "name": "UnauthorizedCustomer",
+      "msg": "Only the booking customer can perform this action"
+    },
+    {
+      "code": 6010,
+      "name": "NoShowGraceNotElapsed",
+      "msg": "Cannot claim no-show before grace period has elapsed"
+    },
+    {
+      "code": 6011,
+      "name": "CannotCancelAfterServiceStart",
+      "msg": "Cannot cancel after service has started"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidCustomerShare",
+      "msg": "Customer share must be between 0 and 10000 basis points"
+    },
+    {
+      "code": 6013,
+      "name": "ArithmeticOverflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidTokenMint",
+      "msg": "Escrow token mint does not match expected USDC mint"
+    }
+  ],
+  "types": [
+    {
+      "name": "Booking",
+      "docs": [
+        "A Booking represents a single customer reservation against a Business.",
+        "",
+        "PDA seeds: [\"booking\", booking_id]",
+        "`booking_id` is a 32-byte client-generated identifier (e.g. UUID v4 → bytes,",
+        "or hash of business+customer+timestamp). It must be unique across the program."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "booking_id",
+            "docs": [
+              "Unique booking identifier (32 bytes, generated by the bridge)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "business",
+            "docs": [
+              "The Business PDA this booking belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "customer",
+            "docs": [
+              "The customer's wallet (signs lock_deposit, customer_cancel)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "deposit_amount",
+            "docs": [
+              "Deposit amount in USDC base units (6 decimals)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "service_start",
+            "docs": [
+              "Service start (unix seconds)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "service_end",
+            "docs": [
+              "Service end (unix seconds)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Current lifecycle state"
+            ],
+            "type": {
+              "defined": {
+                "name": "BookingStatus"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "When this booking record was created"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BookingStatus",
+      "docs": [
+        "Lifecycle of a single booking.",
+        "",
+        "State transitions:",
+        "Pending           → Confirmed         (lock_deposit)",
+        "Pending           → Expired           (timeout — Phase 2)",
+        "Confirmed         → Released          (confirm_attendance)",
+        "Confirmed         → PartiallyReleased (release_partial)",
+        "Confirmed         → Claimed           (claim_full, after grace)",
+        "Confirmed         → CustomerCancelled (customer_cancel, >cancellation_hours before)",
+        "Confirmed         → LateCancelled     (customer_cancel, <cancellation_hours before)",
+        "Confirmed         → Disputed          (raise_dispute — Phase 2)"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Confirmed"
+          },
+          {
+            "name": "Released"
+          },
+          {
+            "name": "PartiallyReleased"
+          },
+          {
+            "name": "Claimed"
+          },
+          {
+            "name": "CustomerCancelled"
+          },
+          {
+            "name": "LateCancelled"
+          },
+          {
+            "name": "Disputed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Business",
+      "docs": [
+        "A Business represents an SMB onboarded onto VoiceDesk.",
+        "",
+        "PDA seeds: [\"business\", owner.key()]",
+        "One business per wallet (MVP). Multi-business per wallet is Phase 2+."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "docs": [
+              "Wallet that controls this business (signs confirm_attendance, claim_full, etc.)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "vertical",
+            "docs": [
+              "Vertical category (informational; deposit logic is universal)"
+            ],
+            "type": {
+              "defined": {
+                "name": "Vertical"
+              }
+            }
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Display name (max 64 bytes)"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "default_deposit_amount",
+            "docs": [
+              "Default deposit amount in USDC base units (6 decimals).",
+              "e.g. 50_000_000 = 50.00 USDC."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "cancellation_hours",
+            "docs": [
+              "Hours before service start during which a customer can fully cancel.",
+              "1..=720 (1 hour to 30 days)."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Vertical",
+      "docs": [
+        "Vertical determines deposit semantics (UI-only — all verticals use the",
+        "same on-chain primitive). Stored to surface in dashboards and logs."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Other"
+          },
+          {
+            "name": "Hotel"
+          },
+          {
+            "name": "CarRental"
+          },
+          {
+            "name": "SkiRental"
+          },
+          {
+            "name": "EquipmentRental"
+          },
+          {
+            "name": "Restaurant"
+          },
+          {
+            "name": "Dental"
+          },
+          {
+            "name": "Salon"
+          },
+          {
+            "name": "Coworking"
+          }
+        ]
+      }
+    }
+  ]
 }
