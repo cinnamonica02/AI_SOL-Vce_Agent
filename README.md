@@ -1,4 +1,4 @@
-# AI Voice Agent — VoiceDesk + PolishFront
+# VoiceDesk — AI Voice Agent + On-Chain Deposits
 
 > **x402-native voice support infrastructure for Polish SMBs.**
 > Built for **Solana Frontier 2026** (Colosseum × SuperTeam Poland).
@@ -69,7 +69,7 @@ AI_Voice_Agent/
 
 ```bash
 # 1. Clone
-git clone https://github.com/Olokolo1990/AI_Voice_Agent.git
+git clone https://github.com/cinnamonica02/AI_SOL-Vce_Agent.git
 cd AI_Voice_Agent
 
 # 2. Copy env template (fill in your keys)
