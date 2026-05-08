@@ -15,11 +15,15 @@ voicedesk = "41HHr5soWR3ScMDKZWPDiaN63KXaqkiAaauzE9MjUtWT"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+# `anchor test` uses this cluster. localnet spins up a local validator
+# (fast + free). For explicit devnet deploys use:
+#   anchor deploy --provider.cluster devnet
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+# Use npx instead of yarn so npm-only environments work.
+test = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
 # After first `anchor build`, replace the placeholder program ID above with
 # the value printed by `solana address -k target/deploy/voicedesk-keypair.json`.
