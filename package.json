@@ -10,6 +10,7 @@
     "test:devnet": "anchor test --skip-local-validator --provider.cluster devnet",
     "deploy:devnet": "anchor deploy --provider.cluster devnet",
     "deploy:devnet:ps": "powershell -ExecutionPolicy Bypass -File scripts/deploy-devnet.ps1",
+    "deploy:devnet:bootstrap:ps": "powershell -ExecutionPolicy Bypass -File scripts/deploy-devnet.ps1 -CreateWallet",
     "verify:devnet:ps": "powershell -ExecutionPolicy Bypass -File scripts/verify-devnet-program.ps1",
     "sync:idl:ps": "powershell -ExecutionPolicy Bypass -File scripts/sync-idl.ps1",
     "lint": "prettier --check 'tests/**/*.ts'",

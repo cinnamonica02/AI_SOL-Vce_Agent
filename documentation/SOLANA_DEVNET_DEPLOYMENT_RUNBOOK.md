@@ -23,10 +23,23 @@ On Windows PowerShell:
 .\scripts\deploy-devnet.ps1
 ```
 
+For a first-time Windows machine, let the script create a repo-local devnet
+deployer wallet at `.solana/devnet-deployer.json`:
+
+```powershell
+.\scripts\deploy-devnet.ps1 -CreateWallet
+```
+
 Or through npm:
 
 ```bash
 npm run deploy:devnet:ps
+```
+
+First-time bootstrap through npm:
+
+```bash
+npm run deploy:devnet:bootstrap:ps
 ```
 
 Manual equivalent:
@@ -38,6 +51,19 @@ solana airdrop 2
 anchor build
 anchor deploy --provider.cluster devnet
 ```
+
+The `.solana/` directory is gitignored. Do not commit deployer wallets.
+
+On Windows, `anchor build` may need Developer Mode enabled or an elevated
+PowerShell session the first time it installs SBF platform tools. If the build
+fails with:
+
+```text
+A required privilege is not held by the client. (os error 1314)
+```
+
+enable Windows Developer Mode, or rerun the deploy command from PowerShell as
+Administrator.
 
 After deploy, get the deployed program ID:
 
