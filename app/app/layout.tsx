@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@solana/wallet-adapter-react-ui/styles.css";
 import { WalletProvider } from "@/components/providers/wallet-provider";
 
 export const metadata: Metadata = {

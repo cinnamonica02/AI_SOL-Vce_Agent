@@ -6,6 +6,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
 import {
   deriveBusinessPda,
+  bytesToHex,
   useVoiceDeskProgram,
 } from "@/lib/anchor-client";
 import { formatUsdc, truncatePubkey } from "@/lib/utils";
@@ -67,7 +68,7 @@ export default function DashboardPage() {
         setBookings(
           all.map((b) => ({
             pubkey: b.publicKey.toBase58(),
-            bookingIdHex: Buffer.from(b.account.bookingId).toString("hex"),
+            bookingIdHex: bytesToHex(b.account.bookingId),
             customer: b.account.customer.toBase58(),
             depositAmount: BigInt(b.account.depositAmount.toString()),
             serviceStart: Number(b.account.serviceStart),

@@ -71,21 +71,21 @@ export function useVoiceDeskProgram(): Program<Idl> | null {
 
 export function deriveBusinessPda(owner: PublicKey): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("business"), owner.toBuffer()],
+    [utf8Bytes("business"), owner.toBytes()],
     PROGRAM_ID
   );
 }
 
 export function deriveBookingPda(bookingId: Uint8Array): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("booking"), Buffer.from(bookingId)],
+    [utf8Bytes("booking"), bookingId],
     PROGRAM_ID
   );
 }
 
 export function deriveEscrowAuthority(bookingId: Uint8Array): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("escrow"), Buffer.from(bookingId)],
+    [utf8Bytes("escrow"), bookingId],
     PROGRAM_ID
   );
 }
@@ -119,6 +119,14 @@ export function bookingIdFromHex(hex: string): Uint8Array {
     out[i] = parseInt(clean.substr(i * 2, 2), 16);
   }
   return out;
+}
+
+export function bytesToHex(bytes: ArrayLike<number>): string {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function utf8Bytes(value: string): Uint8Array {
+  return new TextEncoder().encode(value);
 }
 
 // Re-export for convenience

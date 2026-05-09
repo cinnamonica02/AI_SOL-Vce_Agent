@@ -1,9 +1,8 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { PublicKey, Transaction } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
@@ -30,9 +29,9 @@ interface BookingState {
 export default function PayPage({
   params,
 }: {
-  params: Promise<{ bookingId: string }>;
+  params: { bookingId: string };
 }) {
-  const { bookingId } = use(params);
+  const { bookingId } = params;
   const { connected, publicKey } = useWallet();
   const provider = useAnchorProvider();
   const program = useVoiceDeskProgram();
