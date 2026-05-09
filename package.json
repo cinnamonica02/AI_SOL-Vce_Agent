@@ -9,6 +9,9 @@
     "test": "anchor test",
     "test:devnet": "anchor test --skip-local-validator --provider.cluster devnet",
     "deploy:devnet": "anchor deploy --provider.cluster devnet",
+    "deploy:devnet:ps": "powershell -ExecutionPolicy Bypass -File scripts/deploy-devnet.ps1",
+    "verify:devnet:ps": "powershell -ExecutionPolicy Bypass -File scripts/verify-devnet-program.ps1",
+    "sync:idl:ps": "powershell -ExecutionPolicy Bypass -File scripts/sync-idl.ps1",
     "lint": "prettier --check 'tests/**/*.ts'",
     "lint:fix": "prettier --write 'tests/**/*.ts'"
   },

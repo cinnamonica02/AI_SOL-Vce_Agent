@@ -10,6 +10,9 @@ For the service map and sequence diagrams, see
 For the FastAPI bridge deployment, see
 `documentation/RAILWAY_BRIDGE_RUNBOOK.md`.
 
+For the Anchor program deployment required by `/business/new`, see
+`documentation/SOLANA_DEVNET_DEPLOYMENT_RUNBOOK.md`.
+
 ## Current State
 
 - Frontend path: `app/`

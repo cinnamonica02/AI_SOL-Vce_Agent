@@ -7,7 +7,11 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { SystemProgram } from "@solana/web3.js";
 import {
   BN,
+  PROGRAM_ID,
   deriveBusinessPda,
+  getProgramDeploymentStatus,
+  getProgramExplorerUrl,
+  useAnchorProvider,
   useVoiceDeskProgram,
   verticalEnum,
 } from "@/lib/anchor-client";
@@ -27,6 +31,7 @@ const VERTICALS = [
 export default function NewBusinessPage() {
   const router = useRouter();
   const { connected, publicKey } = useWallet();
+  const provider = useAnchorProvider();
   const program = useVoiceDeskProgram();
 
   const [vertical, setVertical] = useState("Hotel");
@@ -56,11 +61,26 @@ export default function NewBusinessPage() {
       return;
     }
 
+    if (!provider) {
+      setError("Wallet provider not ready. Reconnect Phantom and try again.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     setTxSig(null);
 
     try {
+      const deploymentStatus = await getProgramDeploymentStatus(provider.connection);
+      if (deploymentStatus !== "deployed") {
+        setError(
+          `VoiceDesk program ${PROGRAM_ID.toBase58()} is ${deploymentStatus} on ` +
+            `${process.env.NEXT_PUBLIC_NETWORK ?? "devnet"}. Deploy the Anchor ` +
+            `program first, then redeploy Vercel with the deployed program ID.`
+        );
+        return;
+      }
+
       const [businessPda] = deriveBusinessPda(publicKey);
       const depositBaseUnits = new BN(Math.floor(parseFloat(depositUsdc) * 1_000_000));
 
@@ -165,7 +185,17 @@ export default function NewBusinessPage() {
 
           {error && (
             <div className="rounded-lg border border-red-500/30 bg-red-50 dark:bg-red-950/20 p-3 text-sm text-red-700 dark:text-red-300">
-              {error}
+              <p>{error}</p>
+              {error.includes("VoiceDesk program") && (
+                <a
+                  href={getProgramExplorerUrl()}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 block text-xs underline"
+                >
+                  View configured program on Solana Explorer
+                </a>
+              )}
             </div>
           )}
 

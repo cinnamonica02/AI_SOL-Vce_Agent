@@ -63,8 +63,25 @@ export function useVoiceDeskProgram(): Program<Idl> | null {
       );
       return null;
     }
-    return new Program(idlJson as Idl, provider);
+    const idlWithProgramId = {
+      ...(idlJson as Idl),
+      address: PROGRAM_ID.toBase58(),
+    };
+    return new Program(idlWithProgramId as Idl, provider);
   }, [provider]);
+}
+
+export async function getProgramDeploymentStatus(
+  connection: Connection
+): Promise<"deployed" | "missing" | "not-executable"> {
+  const account = await connection.getAccountInfo(PROGRAM_ID, "confirmed");
+  if (!account) return "missing";
+  return account.executable ? "deployed" : "not-executable";
+}
+
+export function getProgramExplorerUrl(): string {
+  const cluster = process.env.NEXT_PUBLIC_NETWORK ?? "devnet";
+  return `https://explorer.solana.com/address/${PROGRAM_ID.toBase58()}?cluster=${cluster}`;
 }
 
 // ─── PDA derivation ──────────────────────────────────────────────
