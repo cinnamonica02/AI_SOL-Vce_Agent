@@ -13,16 +13,16 @@ export default function HomePage() {
 
         <div className="flex gap-4 justify-center pt-6">
           <Link
-            href="/book"
+            href="/dashboard"
             className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium"
           >
-            Talk to assistant (customer)
+            SMB dashboard
           </Link>
           <Link
-            href="/dashboard"
+            href="/business/new"
             className="px-6 py-3 rounded-lg border border-border font-medium"
           >
-            SMB dashboard
+            Onboard business
           </Link>
         </div>
 

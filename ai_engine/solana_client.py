@@ -210,8 +210,8 @@ async def create_booking_intent(
     )
     log.info("create_booking_intent tx: %s", tx_sig)
 
-    public_api = os.getenv("PUBLIC_API_URL", "http://localhost:3000")
-    payment_url = f"{public_api}/pay/{booking_id.hex()}"
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+    payment_url = f"{frontend_url}/pay/{booking_id.hex()}"
 
     return BookingIntentResult(
         booking_id_hex=booking_id.hex(),
