@@ -14,7 +14,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     POETRY_VERSION=1.8.2 \
     POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_NO_INTERACTION=1
+    POETRY_NO_INTERACTION=1 \
+    IDL_PATH=/app/idl/voicedesk.json
 
 # System deps: build tools for any wheels that compile from source
 # (solana-py + anchorpy pull in cryptography which sometimes builds from source)
@@ -29,17 +30,17 @@ RUN pip install "poetry==${POETRY_VERSION}"
 
 WORKDIR /app
 
-# Copy only dependency manifests first (better layer caching)
-COPY ai_engine/pyproject.toml ai_engine/poetry.lock* /app/
+# Copy dependency manifest first (better layer caching)
+COPY ai_engine/pyproject.toml /app/
 
 # Install dependencies (no project install yet — code mounted at runtime in dev)
 RUN poetry install --no-root --no-ansi
 
 # Copy source (overlaid by volume mount in compose.dev.yml during dev)
 COPY ai_engine/ /app/
+COPY app/lib/idl/voicedesk.json /app/idl/voicedesk.json
 
 EXPOSE 8000
 
-# Default command: hot-reload uvicorn for development.
-# Override in production with --workers N --no-reload.
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Production-friendly default. Railway sets PORT; local Docker falls back to 8000.
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]

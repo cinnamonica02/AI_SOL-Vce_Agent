@@ -4,6 +4,12 @@ This project is a monorepo. Deploy only the Next.js frontend in `app/` to Vercel
 The FastAPI bridge is a separate service and should be deployed to Railway or a
 similar container host.
 
+For the service map and sequence diagrams, see
+`documentation/architecture/DIAGRAMS.md`.
+
+For the FastAPI bridge deployment, see
+`documentation/RAILWAY_BRIDGE_RUNBOOK.md`.
+
 ## Current State
 
 - Frontend path: `app/`
